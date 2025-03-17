@@ -19,7 +19,7 @@ from sensor_msgs.msg import CameraInfo
 
 class yolo_class:
 
-    def __init__(self, weights_path, classes_path, img_topic, depth_topic, queue_size, visualize):
+    def __init__(self, weights_path, classes_path, img_topic, depth_topic, info_topic, queue_size, visualize):
 
         self._class_to_color = {}
         self.cv_bridge = CvBridge()
@@ -33,7 +33,7 @@ class yolo_class:
         self.img_subscriber = rospy.Subscriber(img_topic, Image, self.process_img_msg)
         self.depht_subscriber = rospy.Subscriber(depth_topic, Image, self.depth_callback)
 
-        self.camera_info_subscriber = rospy.Subscriber("/camera/depth/camera_info", CameraInfo, self.camera_info_callback)
+        self.camera_info_subscriber = rospy.Subscriber(info_topic , CameraInfo, self.camera_info_callback)
 
         self.position_pub = rospy.Publisher('/yolov8/BoundingBoxes',  BoundingBoxes, queue_size=1)
         self.depth_points_pub = rospy.Publisher('/yolov8/DepthPoints',  DepthPoints, queue_size=1) 
@@ -153,11 +153,12 @@ def main(args):
 
     weights_path = rospy.get_param("~weights_path", "")
     classes_path = rospy.get_param("~classes_path", "")
-    img_topic =    rospy.get_param("~img_topic", "/usb_cam/image_raw")
+    img_topic =    rospy.get_param("~img_topic", "camera/image_raw")
     depth_topic =  rospy.get_param("~center_depth_topic", "/camera/depth/image_raw" )
+    info_topic =   rospy.get_param("~info_topic", "/camera/depth/camera_info")
     queue_size =   rospy.get_param("~queue_size", 1)
-    visualize =    rospy.get_param("~visualize", False)
-    yolo_class(weights_path,classes_path,img_topic,depth_topic,queue_size,visualize)
+    visualize =    rospy.get_param("~visualize", True)
+    yolo_class(weights_path,classes_path,img_topic,depth_topic,info_topic,queue_size,visualize)
 
     rospy.loginfo("YOLOv8 initialization complete")
     try:
